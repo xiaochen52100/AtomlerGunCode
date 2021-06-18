@@ -596,6 +596,26 @@
             },
             {
                 "children": [],
+                "depends_on": "ESP32_REV_MIN_3 || IDF_TARGET_ESP32S2",
+                "help": null,
+                "id": "SECURE_BOOT_SUPPORTS_RSA",
+                "name": "SECURE_BOOT_SUPPORTS_RSA",
+                "range": null,
+                "title": null,
+                "type": "bool"
+            },
+            {
+                "children": [],
+                "depends_on": "IDF_TARGET_ESP32S2",
+                "help": null,
+                "id": "SECURE_TARGET_HAS_SECURE_ROM_DL_MODE",
+                "name": "SECURE_TARGET_HAS_SECURE_ROM_DL_MODE",
+                "range": null,
+                "title": null,
+                "type": "bool"
+            },
+            {
+                "children": [],
                 "depends_on": "!SECURE_BOOT",
                 "help": "Require apps to be signed to verify their integrity.\n\nThis option uses the same app signature scheme as hardware secure boot, but unlike hardware secure boot it\ndoes not prevent the bootloader from being physically updated. This means that the device can be secured\nagainst remote network access, but not physical access. Compared to using hardware Secure Boot this option\nis much simpler to implement.",
                 "id": "SECURE_SIGNED_APPS_NO_SECURE_BOOT",
@@ -618,7 +638,7 @@
                     },
                     {
                         "children": [],
-                        "depends_on": "(ESP32_REV_MIN_3 || IDF_TARGET_ESP32S2) && SECURE_BOOT_V2_ENABLED && <choice SECURE_SIGNED_APPS_SCHEME>",
+                        "depends_on": "SECURE_BOOT_SUPPORTS_RSA && SECURE_BOOT_V2_ENABLED && <choice SECURE_SIGNED_APPS_SCHEME>",
                         "help": "Appends the RSA-3072 based Signature block to the application.\nRefer to <Secure Boot Version 2 documentation link> before enabling.",
                         "id": "SECURE_SIGNED_APPS_RSA_SCHEME",
                         "name": "SECURE_SIGNED_APPS_RSA_SCHEME",
@@ -670,7 +690,7 @@
                             },
                             {
                                 "children": [],
-                                "depends_on": "(ESP32_REV_MIN_3 || IDF_TARGET_ESP32S2) && <choice SECURE_BOOT_VERSION>",
+                                "depends_on": "SECURE_BOOT_SUPPORTS_RSA && <choice SECURE_BOOT_VERSION>",
                                 "help": "Build a bootloader which enables Secure Boot version 2 on first boot.\nRefer to Secure Boot V2 section of the ESP-IDF Programmer's Guide for this version before enabling.",
                                 "id": "SECURE_BOOT_V2_ENABLED",
                                 "name": "SECURE_BOOT_V2_ENABLED",
@@ -977,7 +997,7 @@
             },
             {
                 "children": [],
-                "depends_on": "IDF_TARGET_ESP32S2 && !SECURE_DISABLE_ROM_DL_MODE",
+                "depends_on": "SECURE_TARGET_HAS_SECURE_ROM_DL_MODE && !SECURE_DISABLE_ROM_DL_MODE",
                 "help": "If set, during startup the app will burn an eFuse bit to permanently switch the UART ROM\nDownload Mode into a separate Secure Download mode. This option can only work if\nDownload Mode is not already disabled by eFuse.\n\nSecure Download mode limits the use of Download Mode functions to simple flash read,\nwrite and erase operations, plus a command to return a summary of currently enabled\nsecurity features.\n\nSecure Download mode is not compatible with the esptool.py flasher stub feature,\nespefuse.py, read/writing memory or registers, encrypted download, or any other\nfeatures that interact with unsupported Download Mode commands.\n\nSecure Download mode should be enabled in any application where Flash Encryption\nand/or Secure Boot is enabled. Disabling this option does not immediately cancel\nthe benefits of the security features, but it increases the potential \"attack\nsurface\" for an attacker to try and bypass them with a successful physical attack.\n\nIt is also possible to enable secure download mode at runtime by calling\nesp_efuse_enable_rom_secure_download_mode()",
                 "id": "SECURE_ENABLE_SECURE_ROM_DL_MODE",
                 "name": "SECURE_ENABLE_SECURE_ROM_DL_MODE",
@@ -2808,7 +2828,7 @@
                                 "id": "ESP32_RTC_CLK_SRC_EXT_OSC",
                                 "name": "ESP32_RTC_CLK_SRC_EXT_OSC",
                                 "range": null,
-                                "title": "External 32kHz oscillator at 32K_XP pin",
+                                "title": "External 32kHz oscillator at 32K_XN pin",
                                 "type": "bool"
                             },
                             {
@@ -2823,7 +2843,7 @@
                             }
                         ],
                         "depends_on": null,
-                        "help": "Choose which clock is used as RTC clock source.\n\n- \"Internal 150kHz oscillator\" option provides lowest deep sleep current\n  consumption, and does not require extra external components. However\n  frequency stability with respect to temperature is poor, so time may\n  drift in deep/light sleep modes.\n- \"External 32kHz crystal\" provides better frequency stability, at the\n  expense of slightly higher (1uA) deep sleep current consumption.\n- \"External 32kHz oscillator\" allows using 32kHz clock generated by an\n  external circuit. In this case, external clock signal must be connected\n  to 32K_XP pin. Amplitude should be <1.2V in case of sine wave signal,\n  and <1V in case of square wave signal. Common mode voltage should be\n  0.1 < Vcm < 0.5Vamp, where Vamp is the signal amplitude.\n  Additionally, 1nF capacitor must be connected between 32K_XN pin and\n  ground. 32K_XN pin can not be used as a GPIO in this case.\n- \"Internal 8.5MHz oscillator divided by 256\" option results in higher\n  deep sleep current (by 5uA) but has better frequency stability than\n  the internal 150kHz oscillator. It does not require external components.",
+                        "help": "Choose which clock is used as RTC clock source.\n\n- \"Internal 150kHz oscillator\" option provides lowest deep sleep current\n  consumption, and does not require extra external components. However\n  frequency stability with respect to temperature is poor, so time may\n  drift in deep/light sleep modes.\n- \"External 32kHz crystal\" provides better frequency stability, at the\n  expense of slightly higher (1uA) deep sleep current consumption.\n- \"External 32kHz oscillator\" allows using 32kHz clock generated by an\n  external circuit. In this case, external clock signal must be connected\n  to 32K_XN pin. Amplitude should be <1.2V in case of sine wave signal,\n  and <1V in case of square wave signal. Common mode voltage should be\n  0.1 < Vcm < 0.5Vamp, where Vamp is the signal amplitude.\n  Additionally, 1nF capacitor must be connected between 32K_XP pin and\n  ground. 32K_XP pin can not be used as a GPIO in this case.\n- \"Internal 8.5MHz oscillator divided by 256\" option results in higher\n  deep sleep current (by 5uA) but has better frequency stability than\n  the internal 150kHz oscillator. It does not require external components.",
                         "id": "component-config-esp32-specific-rtc-clock-source",
                         "name": "ESP32_RTC_CLK_SRC",
                         "title": "RTC clock source",
@@ -3742,6 +3762,16 @@
                         "type": "bool"
                     },
                     {
+                        "children": [],
+                        "depends_on": null,
+                        "help": "SPI Flash driver uses the flash size configured in bootloader header by default.\nEnable this option to override flash size with latest ESPTOOLPY_FLASHSIZE value from\nthe app header if the size in the bootloader header is incorrect.",
+                        "id": "SPI_FLASH_SIZE_OVERRIDE",
+                        "name": "SPI_FLASH_SIZE_OVERRIDE",
+                        "range": null,
+                        "title": "Override flash size in bootloader header by ESPTOOLPY_FLASHSIZE",
+                        "type": "bool"
+                    },
+                    {
                         "children": [
                             {
                                 "children": [],
@@ -3778,6 +3808,16 @@
                         "id": "component-config-spi-flash-driver-auto-detect-flash-chips",
                         "title": "Auto-detect flash chips",
                         "type": "menu"
+                    },
+                    {
+                        "children": [],
+                        "depends_on": null,
+                        "help": "This option enables flash read/write operations to encrypted partition/s. This option\nis kept enabled irrespective of state of flash encryption feature. However, in case\napplication is not using flash encryption feature and is in need of some additional\nmemory from IRAM region (~1KB) then this config can be disabled.",
+                        "id": "SPI_FLASH_ENABLE_ENCRYPTED_READ_WRITE",
+                        "name": "SPI_FLASH_ENABLE_ENCRYPTED_READ_WRITE",
+                        "range": null,
+                        "title": "Enable encrypted partition read/write operations",
+                        "type": "bool"
                     }
                 ],
                 "depends_on": null,

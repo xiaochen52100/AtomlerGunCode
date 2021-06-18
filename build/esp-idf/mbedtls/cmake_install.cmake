@@ -1,8 +1,8 @@
-# Install script for directory: E:/esp-idf/components/mbedtls
+# Install script for directory: D:/esp-idf/components/mbedtls
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "C:/Program Files (x86)/udp-multicast")
+  set(CMAKE_INSTALL_PREFIX "C:/Program Files (x86)/AtomlerGun")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -34,7 +34,7 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("E:/personal/qixiaochen/esp32/Esp32Display3/build/esp-idf/mbedtls/mbedtls/cmake_install.cmake")
+  include("D:/personal/qixiaochen/AtomlerGunCode/build/esp-idf/mbedtls/mbedtls/cmake_install.cmake")
 
 endif()
 

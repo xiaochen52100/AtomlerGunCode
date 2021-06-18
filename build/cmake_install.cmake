@@ -1,8 +1,8 @@
-# Install script for directory: E:/personal/qixiaochen/esp32/Esp32Display3
+# Install script for directory: D:/personal/qixiaochen/AtomlerGunCode
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "C:/Program Files (x86)/udp-multicast")
+  set(CMAKE_INSTALL_PREFIX "C:/Program Files (x86)/AtomlerGun")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -34,7 +34,7 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("E:/personal/qixiaochen/esp32/Esp32Display3/build/esp-idf/cmake_install.cmake")
+  include("D:/personal/qixiaochen/AtomlerGunCode/build/esp-idf/cmake_install.cmake")
 
 endif()
 
@@ -46,5 +46,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "E:/personal/qixiaochen/esp32/Esp32Display3/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "D:/personal/qixiaochen/AtomlerGunCode/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

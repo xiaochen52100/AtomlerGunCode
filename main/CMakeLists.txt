@@ -1,2 +1,2 @@
-idf_component_register(SRCS "udp_multicast_example_main.c"
+idf_component_register(SRCS "AtomlerGun.c"
                     INCLUDE_DIRS ".")

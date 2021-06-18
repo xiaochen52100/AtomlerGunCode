@@ -1,4 +1,4 @@
-# Install script for directory: E:/esp-idf/components/soc
+# Install script for directory: D:/esp-idf/components/soc
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -34,8 +34,8 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("E:/personal/qixiaochen/esp32/Esp32Display3/build/bootloader/esp-idf/soc/src/esp32/cmake_install.cmake")
-  include("E:/personal/qixiaochen/esp32/Esp32Display3/build/bootloader/esp-idf/soc/soc/cmake_install.cmake")
+  include("D:/personal/qixiaochen/AtomlerGunCode/build/bootloader/esp-idf/soc/src/esp32/cmake_install.cmake")
+  include("D:/personal/qixiaochen/AtomlerGunCode/build/bootloader/esp-idf/soc/soc/cmake_install.cmake")
 
 endif()
 

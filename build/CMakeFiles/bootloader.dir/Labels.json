@@ -2,34 +2,34 @@
 	"sources" : 
 	[
 		{
-			"file" : "E:/personal/qixiaochen/esp32/Esp32Display3/build/CMakeFiles/bootloader"
+			"file" : "D:/personal/qixiaochen/AtomlerGunCode/build/CMakeFiles/bootloader"
 		},
 		{
-			"file" : "E:/personal/qixiaochen/esp32/Esp32Display3/build/CMakeFiles/bootloader.rule"
+			"file" : "D:/personal/qixiaochen/AtomlerGunCode/build/CMakeFiles/bootloader.rule"
 		},
 		{
-			"file" : "E:/personal/qixiaochen/esp32/Esp32Display3/build/CMakeFiles/bootloader-complete.rule"
+			"file" : "D:/personal/qixiaochen/AtomlerGunCode/build/CMakeFiles/bootloader-complete.rule"
 		},
 		{
-			"file" : "E:/personal/qixiaochen/esp32/Esp32Display3/build/bootloader-prefix/src/bootloader-stamp/bootloader-install.rule"
+			"file" : "D:/personal/qixiaochen/AtomlerGunCode/build/bootloader-prefix/src/bootloader-stamp/bootloader-install.rule"
 		},
 		{
-			"file" : "E:/personal/qixiaochen/esp32/Esp32Display3/build/bootloader-prefix/src/bootloader-stamp/bootloader-mkdir.rule"
+			"file" : "D:/personal/qixiaochen/AtomlerGunCode/build/bootloader-prefix/src/bootloader-stamp/bootloader-mkdir.rule"
 		},
 		{
-			"file" : "E:/personal/qixiaochen/esp32/Esp32Display3/build/bootloader-prefix/src/bootloader-stamp/bootloader-download.rule"
+			"file" : "D:/personal/qixiaochen/AtomlerGunCode/build/bootloader-prefix/src/bootloader-stamp/bootloader-download.rule"
 		},
 		{
-			"file" : "E:/personal/qixiaochen/esp32/Esp32Display3/build/bootloader-prefix/src/bootloader-stamp/bootloader-update.rule"
+			"file" : "D:/personal/qixiaochen/AtomlerGunCode/build/bootloader-prefix/src/bootloader-stamp/bootloader-update.rule"
 		},
 		{
-			"file" : "E:/personal/qixiaochen/esp32/Esp32Display3/build/bootloader-prefix/src/bootloader-stamp/bootloader-patch.rule"
+			"file" : "D:/personal/qixiaochen/AtomlerGunCode/build/bootloader-prefix/src/bootloader-stamp/bootloader-patch.rule"
 		},
 		{
-			"file" : "E:/personal/qixiaochen/esp32/Esp32Display3/build/bootloader-prefix/src/bootloader-stamp/bootloader-configure.rule"
+			"file" : "D:/personal/qixiaochen/AtomlerGunCode/build/bootloader-prefix/src/bootloader-stamp/bootloader-configure.rule"
 		},
 		{
-			"file" : "E:/personal/qixiaochen/esp32/Esp32Display3/build/bootloader-prefix/src/bootloader-stamp/bootloader-build.rule"
+			"file" : "D:/personal/qixiaochen/AtomlerGunCode/build/bootloader-prefix/src/bootloader-stamp/bootloader-build.rule"
 		}
 	],
 	"target" : 

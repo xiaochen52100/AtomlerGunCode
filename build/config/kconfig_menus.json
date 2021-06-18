@@ -668,6 +668,26 @@
             },
             {
                 "children": [],
+                "depends_on": "ESP32_REV_MIN_3 || IDF_TARGET_ESP32S2",
+                "help": null,
+                "id": "SECURE_BOOT_SUPPORTS_RSA",
+                "name": "SECURE_BOOT_SUPPORTS_RSA",
+                "range": null,
+                "title": null,
+                "type": "bool"
+            },
+            {
+                "children": [],
+                "depends_on": "IDF_TARGET_ESP32S2",
+                "help": null,
+                "id": "SECURE_TARGET_HAS_SECURE_ROM_DL_MODE",
+                "name": "SECURE_TARGET_HAS_SECURE_ROM_DL_MODE",
+                "range": null,
+                "title": null,
+                "type": "bool"
+            },
+            {
+                "children": [],
                 "depends_on": "!SECURE_BOOT",
                 "help": "Require apps to be signed to verify their integrity.\n\nThis option uses the same app signature scheme as hardware secure boot, but unlike hardware secure boot it\ndoes not prevent the bootloader from being physically updated. This means that the device can be secured\nagainst remote network access, but not physical access. Compared to using hardware Secure Boot this option\nis much simpler to implement.",
                 "id": "SECURE_SIGNED_APPS_NO_SECURE_BOOT",
@@ -690,7 +710,7 @@
                     },
                     {
                         "children": [],
-                        "depends_on": "(ESP32_REV_MIN_3 || IDF_TARGET_ESP32S2) && SECURE_BOOT_V2_ENABLED && <choice SECURE_SIGNED_APPS_SCHEME>",
+                        "depends_on": "SECURE_BOOT_SUPPORTS_RSA && SECURE_BOOT_V2_ENABLED && <choice SECURE_SIGNED_APPS_SCHEME>",
                         "help": "Appends the RSA-3072 based Signature block to the application.\nRefer to <Secure Boot Version 2 documentation link> before enabling.",
                         "id": "SECURE_SIGNED_APPS_RSA_SCHEME",
                         "name": "SECURE_SIGNED_APPS_RSA_SCHEME",
@@ -742,7 +762,7 @@
                             },
                             {
                                 "children": [],
-                                "depends_on": "(ESP32_REV_MIN_3 || IDF_TARGET_ESP32S2) && <choice SECURE_BOOT_VERSION>",
+                                "depends_on": "SECURE_BOOT_SUPPORTS_RSA && <choice SECURE_BOOT_VERSION>",
                                 "help": "Build a bootloader which enables Secure Boot version 2 on first boot.\nRefer to Secure Boot V2 section of the ESP-IDF Programmer's Guide for this version before enabling.",
                                 "id": "SECURE_BOOT_V2_ENABLED",
                                 "name": "SECURE_BOOT_V2_ENABLED",
@@ -1049,7 +1069,7 @@
             },
             {
                 "children": [],
-                "depends_on": "IDF_TARGET_ESP32S2 && !SECURE_DISABLE_ROM_DL_MODE",
+                "depends_on": "SECURE_TARGET_HAS_SECURE_ROM_DL_MODE && !SECURE_DISABLE_ROM_DL_MODE",
                 "help": "If set, during startup the app will burn an eFuse bit to permanently switch the UART ROM\nDownload Mode into a separate Secure Download mode. This option can only work if\nDownload Mode is not already disabled by eFuse.\n\nSecure Download mode limits the use of Download Mode functions to simple flash read,\nwrite and erase operations, plus a command to return a summary of currently enabled\nsecurity features.\n\nSecure Download mode is not compatible with the esptool.py flasher stub feature,\nespefuse.py, read/writing memory or registers, encrypted download, or any other\nfeatures that interact with unsupported Download Mode commands.\n\nSecure Download mode should be enabled in any application where Flash Encryption\nand/or Secure Boot is enabled. Disabling this option does not immediately cancel\nthe benefits of the security features, but it increases the potential \"attack\nsurface\" for an attacker to try and bypass them with a successful physical attack.\n\nIt is also possible to enable secure download mode at runtime by calling\nesp_efuse_enable_rom_secure_download_mode()",
                 "id": "SECURE_ENABLE_SECURE_ROM_DL_MODE",
                 "name": "SECURE_ENABLE_SECURE_ROM_DL_MODE",
@@ -3583,6 +3603,16 @@
                                                 "name": "BT_GATTS_PPCP_CHAR_GAP",
                                                 "range": null,
                                                 "title": "Enable Peripheral Preferred Connection Parameters characteristic in GAP service",
+                                                "type": "bool"
+                                            },
+                                            {
+                                                "children": [],
+                                                "depends_on": "BT_GATTS_ENABLE",
+                                                "help": "This option can be close when the app does not require blufi function.",
+                                                "id": "BT_BLE_BLUFI_ENABLE",
+                                                "name": "BT_BLE_BLUFI_ENABLE",
+                                                "range": null,
+                                                "title": "Include blufi function",
                                                 "type": "bool"
                                             },
                                             {
@@ -6303,6 +6333,55 @@
                     {
                         "children": [],
                         "depends_on": "BLE_MESH",
+                        "help": "If enabled, users can use the function esp_ble_mesh_deinit() to de-initialize\nthe whole BLE Mesh stack.",
+                        "id": "BLE_MESH_DEINIT",
+                        "name": "BLE_MESH_DEINIT",
+                        "range": null,
+                        "title": "Support de-initialize BLE Mesh stack",
+                        "type": "bool"
+                    },
+                    {
+                        "children": [
+                            {
+                                "children": [
+                                    {
+                                        "children": [],
+                                        "depends_on": "BLE_MESH_SUPPORT_BLE_ADV && BLE_MESH",
+                                        "help": "Number of advertising buffers for BLE packets available.",
+                                        "id": "BLE_MESH_BLE_ADV_BUF_COUNT",
+                                        "name": "BLE_MESH_BLE_ADV_BUF_COUNT",
+                                        "range": null,
+                                        "title": "Number of advertising buffers for BLE advertising packets",
+                                        "type": "int"
+                                    }
+                                ],
+                                "depends_on": "BLE_MESH",
+                                "help": "When selected, users can send normal BLE advertising packets\nwith specific API.",
+                                "id": "BLE_MESH_SUPPORT_BLE_ADV",
+                                "name": "BLE_MESH_SUPPORT_BLE_ADV",
+                                "range": null,
+                                "title": "Support sending normal BLE advertising packets",
+                                "type": "bool"
+                            },
+                            {
+                                "children": [],
+                                "depends_on": "BLE_MESH",
+                                "help": "When selected, users can register a callback and receive normal BLE\nadvertising packets in the application layer.",
+                                "id": "BLE_MESH_SUPPORT_BLE_SCAN",
+                                "name": "BLE_MESH_SUPPORT_BLE_SCAN",
+                                "range": null,
+                                "title": "Support scanning normal BLE advertising packets",
+                                "type": "bool"
+                            }
+                        ],
+                        "depends_on": "BLE_MESH",
+                        "id": "component-config-esp-ble-mesh-support-ble-mesh-and-ble-coexistence-support",
+                        "title": "BLE Mesh and BLE coexistence support",
+                        "type": "menu"
+                    },
+                    {
+                        "children": [],
+                        "depends_on": "BLE_MESH",
                         "help": "Enable this option to allow BLE Mesh fast provisioning solution to be used.\nWhen there are multiple unprovisioned devices around, fast provisioning can\ngreatly reduce the time consumption of the whole provisioning process.\nWhen this option is enabled, and after an unprovisioned device is provisioned\ninto a node successfully, it can be changed to a temporary Provisioner.",
                         "id": "BLE_MESH_FAST_PROV",
                         "name": "BLE_MESH_FAST_PROV",
@@ -6381,6 +6460,27 @@
                                 "range": null,
                                 "title": "Maximum number of application keys that can be owned by Provisioner",
                                 "type": "int"
+                            },
+                            {
+                                "children": [
+                                    {
+                                        "children": [],
+                                        "depends_on": "BLE_MESH_PROVISIONER_RECV_HB && BLE_MESH_PROVISIONER && BLE_MESH",
+                                        "help": "This option specifies how many heartbeat filter entries Provisioner supports.\nThe heartbeat filter (acceptlist or rejectlist) entries are used to store a\nlist of SRC and DST which can be used to decide if a heartbeat message will\nbe processed and notified to the application layer by Provisioner.\nNote: The filter is an empty rejectlist by default.",
+                                        "id": "BLE_MESH_PROVISIONER_RECV_HB_FILTER_SIZE",
+                                        "name": "BLE_MESH_PROVISIONER_RECV_HB_FILTER_SIZE",
+                                        "range": null,
+                                        "title": "Maximum number of filter entries for receiving Heartbeat messages",
+                                        "type": "int"
+                                    }
+                                ],
+                                "depends_on": "BLE_MESH_PROVISIONER && BLE_MESH",
+                                "help": "When this option is enabled, Provisioner can call specific functions to enable\nor disable receiving Heartbeat messages and notify them to the application layer.",
+                                "id": "BLE_MESH_PROVISIONER_RECV_HB",
+                                "name": "BLE_MESH_PROVISIONER_RECV_HB",
+                                "range": null,
+                                "title": "Support receiving Heartbeat messages",
+                                "type": "bool"
                             }
                         ],
                         "depends_on": "BLE_MESH",
@@ -6485,27 +6585,6 @@
                     {
                         "children": [
                             {
-                                "children": [
-                                    {
-                                        "children": [],
-                                        "depends_on": "BLE_MESH_SPECIFIC_PARTITION && BLE_MESH_SETTINGS && BLE_MESH",
-                                        "help": "This value defines the name of the specified NVS partition used by the\nmesh stack.",
-                                        "id": "BLE_MESH_PARTITION_NAME",
-                                        "name": "BLE_MESH_PARTITION_NAME",
-                                        "range": null,
-                                        "title": "Name of the NVS partition for BLE Mesh",
-                                        "type": "string"
-                                    }
-                                ],
-                                "depends_on": "BLE_MESH_SETTINGS && BLE_MESH",
-                                "help": "When selected, the mesh stack will use a specified NVS partition instead of\ndefault NVS partition. Note that the specified partition must be registered\nwith NVS using nvs_flash_init_partition() API, and the partition must exists\nin the csv file.\nWhen Provisioner needs to store a large amount of nodes' information in the\nflash (e.g. more than 20), this option is recommended to be enabled.",
-                                "id": "BLE_MESH_SPECIFIC_PARTITION",
-                                "name": "BLE_MESH_SPECIFIC_PARTITION",
-                                "range": null,
-                                "title": "Use a specific NVS partition for BLE Mesh",
-                                "type": "bool"
-                            },
-                            {
                                 "children": [],
                                 "depends_on": "BLE_MESH_SETTINGS && BLE_MESH",
                                 "help": "This value defines in seconds how soon any pending changes are actually\nwritten into persistent storage (flash) after a change occurs.\nThe option allows nodes to delay a certain period of time to save proper\ninformation to flash. The default value is 0, which means information\nwill be stored immediately once there are updates.",
@@ -6543,6 +6622,48 @@
                                 "name": "BLE_MESH_SETTINGS_BACKWARD_COMPATIBILITY",
                                 "range": null,
                                 "title": "A specific option for settings backward compatibility",
+                                "type": "bool"
+                            },
+                            {
+                                "children": [
+                                    {
+                                        "children": [],
+                                        "depends_on": "BLE_MESH_SPECIFIC_PARTITION && BLE_MESH_SETTINGS && BLE_MESH",
+                                        "help": "This value defines the name of the specified NVS partition used by the\nmesh stack.",
+                                        "id": "BLE_MESH_PARTITION_NAME",
+                                        "name": "BLE_MESH_PARTITION_NAME",
+                                        "range": null,
+                                        "title": "Name of the NVS partition for BLE Mesh",
+                                        "type": "string"
+                                    }
+                                ],
+                                "depends_on": "BLE_MESH_SETTINGS && BLE_MESH",
+                                "help": "When selected, the mesh stack will use a specified NVS partition instead of\ndefault NVS partition. Note that the specified partition must be registered\nwith NVS using nvs_flash_init_partition() API, and the partition must exists\nin the csv file.\nWhen Provisioner needs to store a large amount of nodes' information in the\nflash (e.g. more than 20), this option is recommended to be enabled.",
+                                "id": "BLE_MESH_SPECIFIC_PARTITION",
+                                "name": "BLE_MESH_SPECIFIC_PARTITION",
+                                "range": null,
+                                "title": "Use a specific NVS partition for BLE Mesh",
+                                "type": "bool"
+                            },
+                            {
+                                "children": [
+                                    {
+                                        "children": [],
+                                        "depends_on": "BLE_MESH_USE_MULTIPLE_NAMESPACE && BLE_MESH_SETTINGS && BLE_MESH",
+                                        "help": "This option specifies the maximum NVS namespaces supported by Provisioner.",
+                                        "id": "BLE_MESH_MAX_NVS_NAMESPACE",
+                                        "name": "BLE_MESH_MAX_NVS_NAMESPACE",
+                                        "range": null,
+                                        "title": "Maximum number of NVS namespaces",
+                                        "type": "int"
+                                    }
+                                ],
+                                "depends_on": "BLE_MESH_PROVISIONER && BLE_MESH_SETTINGS && BLE_MESH",
+                                "help": "When selected, Provisioner can use different NVS namespaces to store\ndifferent instances of mesh information.\nFor example, if in the first room, Provisioner uses NetKey A, AppKey\nA and provisions three devices, these information will be treated as\nmesh information instance A. When the Provisioner moves to the second\nroom, it uses NetKey B, AppKey B and provisions two devices, then the\ninformation will be treated as mesh information instance B.\nHere instance A and instance B will be stored in different namespaces.\nWith this option enabled, Provisioner needs to use specific functions\nto open the corresponding NVS namespace, restore the mesh information,\nrelease the mesh information or erase the mesh information.",
+                                "id": "BLE_MESH_USE_MULTIPLE_NAMESPACE",
+                                "name": "BLE_MESH_USE_MULTIPLE_NAMESPACE",
+                                "range": null,
+                                "title": "Support using multiple NVS namespaces by Provisioner",
                                 "type": "bool"
                             }
                         ],
@@ -6633,27 +6754,6 @@
                         "range": null,
                         "title": "Number of advertising buffers",
                         "type": "int"
-                    },
-                    {
-                        "children": [
-                            {
-                                "children": [],
-                                "depends_on": "BLE_MESH_SUPPORT_BLE_ADV && BLE_MESH",
-                                "help": "Number of advertising buffers for BLE packets available.",
-                                "id": "BLE_MESH_BLE_ADV_BUF_COUNT",
-                                "name": "BLE_MESH_BLE_ADV_BUF_COUNT",
-                                "range": null,
-                                "title": "Number of advertising buffers for BLE advertising packets",
-                                "type": "int"
-                            }
-                        ],
-                        "depends_on": "BLE_MESH",
-                        "help": "When selected, users can send normal BLE advertising packets\nwith specific API.",
-                        "id": "BLE_MESH_SUPPORT_BLE_ADV",
-                        "name": "BLE_MESH_SUPPORT_BLE_ADV",
-                        "range": null,
-                        "title": "Support sending normal BLE advertising packets",
-                        "type": "bool"
                     },
                     {
                         "children": [],
@@ -7131,197 +7231,255 @@
                             {
                                 "children": [],
                                 "depends_on": "BLE_MESH",
-                                "help": "Enable support for Configuration client model.",
+                                "help": "Enable support for Configuration Client model.",
                                 "id": "BLE_MESH_CFG_CLI",
                                 "name": "BLE_MESH_CFG_CLI",
                                 "range": null,
-                                "title": "Configuration Client Model",
+                                "title": "Configuration Client model",
                                 "type": "bool"
                             },
                             {
                                 "children": [],
                                 "depends_on": "BLE_MESH",
-                                "help": "Enable support for Health client model.",
+                                "help": "Enable support for Health Client model.",
                                 "id": "BLE_MESH_HEALTH_CLI",
                                 "name": "BLE_MESH_HEALTH_CLI",
                                 "range": null,
-                                "title": "Health Client Model",
+                                "title": "Health Client model",
                                 "type": "bool"
                             },
                             {
                                 "children": [],
                                 "depends_on": "BLE_MESH",
-                                "help": "Enable support for Generic OnOff client model.",
-                                "id": "BLE_MESH_GENERIC_ONOFF_CLI",
-                                "name": "BLE_MESH_GENERIC_ONOFF_CLI",
+                                "help": "Enable support for Health Server model.",
+                                "id": "BLE_MESH_HEALTH_SRV",
+                                "name": "BLE_MESH_HEALTH_SRV",
                                 "range": null,
-                                "title": "Generic OnOff Client Model",
-                                "type": "bool"
-                            },
-                            {
-                                "children": [],
-                                "depends_on": "BLE_MESH",
-                                "help": "Enable support for Generic Level client model.",
-                                "id": "BLE_MESH_GENERIC_LEVEL_CLI",
-                                "name": "BLE_MESH_GENERIC_LEVEL_CLI",
-                                "range": null,
-                                "title": "Generic Level Client Model",
-                                "type": "bool"
-                            },
-                            {
-                                "children": [],
-                                "depends_on": "BLE_MESH",
-                                "help": "Enable support for Generic Default Transition Time client model.",
-                                "id": "BLE_MESH_GENERIC_DEF_TRANS_TIME_CLI",
-                                "name": "BLE_MESH_GENERIC_DEF_TRANS_TIME_CLI",
-                                "range": null,
-                                "title": "Generic Default Transition Time Client Model",
-                                "type": "bool"
-                            },
-                            {
-                                "children": [],
-                                "depends_on": "BLE_MESH",
-                                "help": "Enable support for Generic Power OnOff client model.",
-                                "id": "BLE_MESH_GENERIC_POWER_ONOFF_CLI",
-                                "name": "BLE_MESH_GENERIC_POWER_ONOFF_CLI",
-                                "range": null,
-                                "title": "Generic Power OnOff Client Model",
-                                "type": "bool"
-                            },
-                            {
-                                "children": [],
-                                "depends_on": "BLE_MESH",
-                                "help": "Enable support for Generic Power Level client model.",
-                                "id": "BLE_MESH_GENERIC_POWER_LEVEL_CLI",
-                                "name": "BLE_MESH_GENERIC_POWER_LEVEL_CLI",
-                                "range": null,
-                                "title": "Generic Power Level Client Model",
-                                "type": "bool"
-                            },
-                            {
-                                "children": [],
-                                "depends_on": "BLE_MESH",
-                                "help": "Enable support for Generic Battery client model.",
-                                "id": "BLE_MESH_GENERIC_BATTERY_CLI",
-                                "name": "BLE_MESH_GENERIC_BATTERY_CLI",
-                                "range": null,
-                                "title": "Generic Battery Client Model",
-                                "type": "bool"
-                            },
-                            {
-                                "children": [],
-                                "depends_on": "BLE_MESH",
-                                "help": "Enable support for Generic Location client model.",
-                                "id": "BLE_MESH_GENERIC_LOCATION_CLI",
-                                "name": "BLE_MESH_GENERIC_LOCATION_CLI",
-                                "range": null,
-                                "title": "Generic Location Client Model",
-                                "type": "bool"
-                            },
-                            {
-                                "children": [],
-                                "depends_on": "BLE_MESH",
-                                "help": "Enable support for Generic Property client model.",
-                                "id": "BLE_MESH_GENERIC_PROPERTY_CLI",
-                                "name": "BLE_MESH_GENERIC_PROPERTY_CLI",
-                                "range": null,
-                                "title": "Generic Property Client Model",
-                                "type": "bool"
-                            },
-                            {
-                                "children": [],
-                                "depends_on": "BLE_MESH",
-                                "help": "Enable support for Sensor client model.",
-                                "id": "BLE_MESH_SENSOR_CLI",
-                                "name": "BLE_MESH_SENSOR_CLI",
-                                "range": null,
-                                "title": "Sensor Client Model",
-                                "type": "bool"
-                            },
-                            {
-                                "children": [],
-                                "depends_on": "BLE_MESH",
-                                "help": "Enable support for Time client model.",
-                                "id": "BLE_MESH_TIME_CLI",
-                                "name": "BLE_MESH_TIME_CLI",
-                                "range": null,
-                                "title": "Time Client Model",
-                                "type": "bool"
-                            },
-                            {
-                                "children": [],
-                                "depends_on": "BLE_MESH",
-                                "help": "Enable support for Scene client model.",
-                                "id": "BLE_MESH_SCENE_CLI",
-                                "name": "BLE_MESH_SCENE_CLI",
-                                "range": null,
-                                "title": "Scene Client Model",
-                                "type": "bool"
-                            },
-                            {
-                                "children": [],
-                                "depends_on": "BLE_MESH",
-                                "help": "Enable support for Scheduler client model.",
-                                "id": "BLE_MESH_SCHEDULER_CLI",
-                                "name": "BLE_MESH_SCHEDULER_CLI",
-                                "range": null,
-                                "title": "Scheduler Client Model",
-                                "type": "bool"
-                            },
-                            {
-                                "children": [],
-                                "depends_on": "BLE_MESH",
-                                "help": "Enable support for Light Lightness client model.",
-                                "id": "BLE_MESH_LIGHT_LIGHTNESS_CLI",
-                                "name": "BLE_MESH_LIGHT_LIGHTNESS_CLI",
-                                "range": null,
-                                "title": "Light Lightness Client Model",
-                                "type": "bool"
-                            },
-                            {
-                                "children": [],
-                                "depends_on": "BLE_MESH",
-                                "help": "Enable support for Light CTL client model.",
-                                "id": "BLE_MESH_LIGHT_CTL_CLI",
-                                "name": "BLE_MESH_LIGHT_CTL_CLI",
-                                "range": null,
-                                "title": "Light CTL Client Model",
-                                "type": "bool"
-                            },
-                            {
-                                "children": [],
-                                "depends_on": "BLE_MESH",
-                                "help": "Enable support for Light HSL client model.",
-                                "id": "BLE_MESH_LIGHT_HSL_CLI",
-                                "name": "BLE_MESH_LIGHT_HSL_CLI",
-                                "range": null,
-                                "title": "Light HSL Client Model",
-                                "type": "bool"
-                            },
-                            {
-                                "children": [],
-                                "depends_on": "BLE_MESH",
-                                "help": "Enable support for Light XYL client model.",
-                                "id": "BLE_MESH_LIGHT_XYL_CLI",
-                                "name": "BLE_MESH_LIGHT_XYL_CLI",
-                                "range": null,
-                                "title": "Light XYL Client Model",
-                                "type": "bool"
-                            },
-                            {
-                                "children": [],
-                                "depends_on": "BLE_MESH",
-                                "help": "Enable support for Light LC client model.",
-                                "id": "BLE_MESH_LIGHT_LC_CLI",
-                                "name": "BLE_MESH_LIGHT_LC_CLI",
-                                "range": null,
-                                "title": "Light LC Client Model",
+                                "title": "Health Server model",
                                 "type": "bool"
                             }
                         ],
                         "depends_on": "BLE_MESH",
-                        "id": "component-config-esp-ble-mesh-support-support-for-ble-mesh-client-models",
-                        "title": "Support for BLE Mesh Client Models",
+                        "id": "component-config-esp-ble-mesh-support-support-for-ble-mesh-foundation-models",
+                        "title": "Support for BLE Mesh Foundation models",
+                        "type": "menu"
+                    },
+                    {
+                        "children": [
+                            {
+                                "children": [],
+                                "depends_on": "BLE_MESH",
+                                "help": "Enable support for Generic OnOff Client model.",
+                                "id": "BLE_MESH_GENERIC_ONOFF_CLI",
+                                "name": "BLE_MESH_GENERIC_ONOFF_CLI",
+                                "range": null,
+                                "title": "Generic OnOff Client model",
+                                "type": "bool"
+                            },
+                            {
+                                "children": [],
+                                "depends_on": "BLE_MESH",
+                                "help": "Enable support for Generic Level Client model.",
+                                "id": "BLE_MESH_GENERIC_LEVEL_CLI",
+                                "name": "BLE_MESH_GENERIC_LEVEL_CLI",
+                                "range": null,
+                                "title": "Generic Level Client model",
+                                "type": "bool"
+                            },
+                            {
+                                "children": [],
+                                "depends_on": "BLE_MESH",
+                                "help": "Enable support for Generic Default Transition Time Client model.",
+                                "id": "BLE_MESH_GENERIC_DEF_TRANS_TIME_CLI",
+                                "name": "BLE_MESH_GENERIC_DEF_TRANS_TIME_CLI",
+                                "range": null,
+                                "title": "Generic Default Transition Time Client model",
+                                "type": "bool"
+                            },
+                            {
+                                "children": [],
+                                "depends_on": "BLE_MESH",
+                                "help": "Enable support for Generic Power OnOff Client model.",
+                                "id": "BLE_MESH_GENERIC_POWER_ONOFF_CLI",
+                                "name": "BLE_MESH_GENERIC_POWER_ONOFF_CLI",
+                                "range": null,
+                                "title": "Generic Power OnOff Client model",
+                                "type": "bool"
+                            },
+                            {
+                                "children": [],
+                                "depends_on": "BLE_MESH",
+                                "help": "Enable support for Generic Power Level Client model.",
+                                "id": "BLE_MESH_GENERIC_POWER_LEVEL_CLI",
+                                "name": "BLE_MESH_GENERIC_POWER_LEVEL_CLI",
+                                "range": null,
+                                "title": "Generic Power Level Client model",
+                                "type": "bool"
+                            },
+                            {
+                                "children": [],
+                                "depends_on": "BLE_MESH",
+                                "help": "Enable support for Generic Battery Client model.",
+                                "id": "BLE_MESH_GENERIC_BATTERY_CLI",
+                                "name": "BLE_MESH_GENERIC_BATTERY_CLI",
+                                "range": null,
+                                "title": "Generic Battery Client model",
+                                "type": "bool"
+                            },
+                            {
+                                "children": [],
+                                "depends_on": "BLE_MESH",
+                                "help": "Enable support for Generic Location Client model.",
+                                "id": "BLE_MESH_GENERIC_LOCATION_CLI",
+                                "name": "BLE_MESH_GENERIC_LOCATION_CLI",
+                                "range": null,
+                                "title": "Generic Location Client model",
+                                "type": "bool"
+                            },
+                            {
+                                "children": [],
+                                "depends_on": "BLE_MESH",
+                                "help": "Enable support for Generic Property Client model.",
+                                "id": "BLE_MESH_GENERIC_PROPERTY_CLI",
+                                "name": "BLE_MESH_GENERIC_PROPERTY_CLI",
+                                "range": null,
+                                "title": "Generic Property Client model",
+                                "type": "bool"
+                            },
+                            {
+                                "children": [],
+                                "depends_on": "BLE_MESH",
+                                "help": "Enable support for Sensor Client model.",
+                                "id": "BLE_MESH_SENSOR_CLI",
+                                "name": "BLE_MESH_SENSOR_CLI",
+                                "range": null,
+                                "title": "Sensor Client model",
+                                "type": "bool"
+                            },
+                            {
+                                "children": [],
+                                "depends_on": "BLE_MESH",
+                                "help": "Enable support for Time Client model.",
+                                "id": "BLE_MESH_TIME_CLI",
+                                "name": "BLE_MESH_TIME_CLI",
+                                "range": null,
+                                "title": "Time Client model",
+                                "type": "bool"
+                            },
+                            {
+                                "children": [],
+                                "depends_on": "BLE_MESH",
+                                "help": "Enable support for Scene Client model.",
+                                "id": "BLE_MESH_SCENE_CLI",
+                                "name": "BLE_MESH_SCENE_CLI",
+                                "range": null,
+                                "title": "Scene Client model",
+                                "type": "bool"
+                            },
+                            {
+                                "children": [],
+                                "depends_on": "BLE_MESH",
+                                "help": "Enable support for Scheduler Client model.",
+                                "id": "BLE_MESH_SCHEDULER_CLI",
+                                "name": "BLE_MESH_SCHEDULER_CLI",
+                                "range": null,
+                                "title": "Scheduler Client model",
+                                "type": "bool"
+                            },
+                            {
+                                "children": [],
+                                "depends_on": "BLE_MESH",
+                                "help": "Enable support for Light Lightness Client model.",
+                                "id": "BLE_MESH_LIGHT_LIGHTNESS_CLI",
+                                "name": "BLE_MESH_LIGHT_LIGHTNESS_CLI",
+                                "range": null,
+                                "title": "Light Lightness Client model",
+                                "type": "bool"
+                            },
+                            {
+                                "children": [],
+                                "depends_on": "BLE_MESH",
+                                "help": "Enable support for Light CTL Client model.",
+                                "id": "BLE_MESH_LIGHT_CTL_CLI",
+                                "name": "BLE_MESH_LIGHT_CTL_CLI",
+                                "range": null,
+                                "title": "Light CTL Client model",
+                                "type": "bool"
+                            },
+                            {
+                                "children": [],
+                                "depends_on": "BLE_MESH",
+                                "help": "Enable support for Light HSL Client model.",
+                                "id": "BLE_MESH_LIGHT_HSL_CLI",
+                                "name": "BLE_MESH_LIGHT_HSL_CLI",
+                                "range": null,
+                                "title": "Light HSL Client model",
+                                "type": "bool"
+                            },
+                            {
+                                "children": [],
+                                "depends_on": "BLE_MESH",
+                                "help": "Enable support for Light XYL Client model.",
+                                "id": "BLE_MESH_LIGHT_XYL_CLI",
+                                "name": "BLE_MESH_LIGHT_XYL_CLI",
+                                "range": null,
+                                "title": "Light XYL Client model",
+                                "type": "bool"
+                            },
+                            {
+                                "children": [],
+                                "depends_on": "BLE_MESH",
+                                "help": "Enable support for Light LC Client model.",
+                                "id": "BLE_MESH_LIGHT_LC_CLI",
+                                "name": "BLE_MESH_LIGHT_LC_CLI",
+                                "range": null,
+                                "title": "Light LC Client model",
+                                "type": "bool"
+                            },
+                            {
+                                "children": [],
+                                "depends_on": "BLE_MESH",
+                                "help": "Enable support for Generic server models.",
+                                "id": "BLE_MESH_GENERIC_SERVER",
+                                "name": "BLE_MESH_GENERIC_SERVER",
+                                "range": null,
+                                "title": "Generic server models",
+                                "type": "bool"
+                            },
+                            {
+                                "children": [],
+                                "depends_on": "BLE_MESH",
+                                "help": "Enable support for Sensor server models.",
+                                "id": "BLE_MESH_SENSOR_SERVER",
+                                "name": "BLE_MESH_SENSOR_SERVER",
+                                "range": null,
+                                "title": "Sensor server models",
+                                "type": "bool"
+                            },
+                            {
+                                "children": [],
+                                "depends_on": "BLE_MESH",
+                                "help": "Enable support for Time and Scenes server models.",
+                                "id": "BLE_MESH_TIME_SCENE_SERVER",
+                                "name": "BLE_MESH_TIME_SCENE_SERVER",
+                                "range": null,
+                                "title": "Time and Scenes server models",
+                                "type": "bool"
+                            },
+                            {
+                                "children": [],
+                                "depends_on": "BLE_MESH",
+                                "help": "Enable support for Lighting server models.",
+                                "id": "BLE_MESH_LIGHTING_SERVER",
+                                "name": "BLE_MESH_LIGHTING_SERVER",
+                                "range": null,
+                                "title": "Lighting server models",
+                                "type": "bool"
+                            }
+                        ],
+                        "depends_on": "BLE_MESH",
+                        "id": "component-config-esp-ble-mesh-support-support-for-ble-mesh-client-server-models",
+                        "title": "Support for BLE Mesh Client/Server models",
                         "type": "menu"
                     },
                     {
@@ -7739,6 +7897,24 @@
                         "depends_on": null,
                         "id": "component-config-driver-configurations-spi-configuration",
                         "title": "SPI configuration",
+                        "type": "menu"
+                    },
+                    {
+                        "children": [
+                            {
+                                "children": [],
+                                "depends_on": null,
+                                "help": "Place the TWAI ISR in to IRAM. This will allow the ISR to avoid\ncache misses, and also be able to run whilst the cache is disabled\n(such as when writing to SPI Flash).\nNote that if this option is enabled:\n- Users should also set the ESP_INTR_FLAG_IRAM in the driver\nconfiguration structure when installing the driver (see docs for\nspecifics).\n- Alert logging (i.e., setting of the TWAI_ALERT_AND_LOG flag)\nwill have no effect.",
+                                "id": "TWAI_ISR_IN_IRAM",
+                                "name": "TWAI_ISR_IN_IRAM",
+                                "range": null,
+                                "title": "Place TWAI ISR function into IRAM",
+                                "type": "bool"
+                            }
+                        ],
+                        "depends_on": null,
+                        "id": "component-config-driver-configurations-twai-configuration",
+                        "title": "TWAI configuration",
                         "type": "menu"
                     },
                     {
@@ -8890,7 +9066,7 @@
                                 "id": "ESP32_RTC_CLK_SRC_EXT_OSC",
                                 "name": "ESP32_RTC_CLK_SRC_EXT_OSC",
                                 "range": null,
-                                "title": "External 32kHz oscillator at 32K_XP pin",
+                                "title": "External 32kHz oscillator at 32K_XN pin",
                                 "type": "bool"
                             },
                             {
@@ -8905,7 +9081,7 @@
                             }
                         ],
                         "depends_on": null,
-                        "help": "Choose which clock is used as RTC clock source.\n\n- \"Internal 150kHz oscillator\" option provides lowest deep sleep current\n  consumption, and does not require extra external components. However\n  frequency stability with respect to temperature is poor, so time may\n  drift in deep/light sleep modes.\n- \"External 32kHz crystal\" provides better frequency stability, at the\n  expense of slightly higher (1uA) deep sleep current consumption.\n- \"External 32kHz oscillator\" allows using 32kHz clock generated by an\n  external circuit. In this case, external clock signal must be connected\n  to 32K_XP pin. Amplitude should be <1.2V in case of sine wave signal,\n  and <1V in case of square wave signal. Common mode voltage should be\n  0.1 < Vcm < 0.5Vamp, where Vamp is the signal amplitude.\n  Additionally, 1nF capacitor must be connected between 32K_XN pin and\n  ground. 32K_XN pin can not be used as a GPIO in this case.\n- \"Internal 8.5MHz oscillator divided by 256\" option results in higher\n  deep sleep current (by 5uA) but has better frequency stability than\n  the internal 150kHz oscillator. It does not require external components.",
+                        "help": "Choose which clock is used as RTC clock source.\n\n- \"Internal 150kHz oscillator\" option provides lowest deep sleep current\n  consumption, and does not require extra external components. However\n  frequency stability with respect to temperature is poor, so time may\n  drift in deep/light sleep modes.\n- \"External 32kHz crystal\" provides better frequency stability, at the\n  expense of slightly higher (1uA) deep sleep current consumption.\n- \"External 32kHz oscillator\" allows using 32kHz clock generated by an\n  external circuit. In this case, external clock signal must be connected\n  to 32K_XN pin. Amplitude should be <1.2V in case of sine wave signal,\n  and <1V in case of square wave signal. Common mode voltage should be\n  0.1 < Vcm < 0.5Vamp, where Vamp is the signal amplitude.\n  Additionally, 1nF capacitor must be connected between 32K_XP pin and\n  ground. 32K_XP pin can not be used as a GPIO in this case.\n- \"Internal 8.5MHz oscillator divided by 256\" option results in higher\n  deep sleep current (by 5uA) but has better frequency stability than\n  the internal 150kHz oscillator. It does not require external components.",
                         "id": "component-config-esp32-specific-rtc-clock-source",
                         "name": "ESP32_RTC_CLK_SRC",
                         "title": "RTC clock source",
@@ -12661,6 +12837,16 @@
                             {
                                 "children": [],
                                 "depends_on": null,
+                                "help": "Enables custom TCP ISN hook to randomize initial sequence\nnumber in TCP connection. This is recommended as default\nlwIP implementation (`tcp_next_iss`) is not very strong,\nas it does not take into consideration any platform\nspecific entropy source.",
+                                "id": "LWIP_TCP_ISN_HOOK",
+                                "name": "LWIP_TCP_ISN_HOOK",
+                                "range": null,
+                                "title": "Enable TCP ISN Hook",
+                                "type": "bool"
+                            },
+                            {
+                                "children": [],
+                                "depends_on": null,
                                 "help": "The maximum number of simultaneously active TCP\nconnections. The practical maximum limit is\ndetermined by available heap memory at runtime.\n\nChanging this value by itself does not substantially\nchange the memory usage of LWIP, except for preventing\nnew TCP connections after the limit is reached.",
                                 "id": "LWIP_MAX_ACTIVE_TCP",
                                 "name": "LWIP_MAX_ACTIVE_TCP",
@@ -13325,13 +13511,24 @@
                                 "type": "bool"
                             },
                             {
-                                "children": [],
+                                "children": [
+                                    {
+                                        "children": [],
+                                        "depends_on": "MBEDTLS_DYNAMIC_FREE_CONFIG_DATA",
+                                        "help": "Free ca certificate after its usage in the handshake process.\nThis option will decrease the heap footprint for the TLS handshake, but may lead to a problem:\nIf the respective ssl object needs to perform the TLS handshake again,\nthe ca certificate should once again be registered to the ssl object.",
+                                        "id": "MBEDTLS_DYNAMIC_FREE_CA_CERT",
+                                        "name": "MBEDTLS_DYNAMIC_FREE_CA_CERT",
+                                        "range": null,
+                                        "title": "Free SSL ca certificate after its usage",
+                                        "type": "bool"
+                                    }
+                                ],
                                 "depends_on": "MBEDTLS_DYNAMIC_BUFFER",
-                                "help": "Free certificate, private key and DHM data after its usage in handshake process.\n\nThe option will decrease heap cost when handshake, but also lead to problem:\n\nBecasue all certificate, private key and DHM data are freed so users should register\ncertificate and private key to ssl config object again.",
+                                "help": "Free private key and DHM data after its usage in handshake process.\n\nThe option will decrease heap cost when handshake, but also lead to problem:\n\nBecasue all certificate, private key and DHM data are freed so users should register\ncertificate and private key to ssl config object again.",
                                 "id": "MBEDTLS_DYNAMIC_FREE_CONFIG_DATA",
                                 "name": "MBEDTLS_DYNAMIC_FREE_CONFIG_DATA",
                                 "range": null,
-                                "title": "Free certificate, key and DHM data after its usage",
+                                "title": "Free private key and DHM data after its usage",
                                 "type": "bool"
                             }
                         ],
@@ -14489,6 +14686,16 @@
                     {
                         "children": [],
                         "depends_on": null,
+                        "help": "Configures strict mode. Set this to 1 for the mDNS library to strictly follow the RFC6762:\nCurrently the only strict feature: Do not repeat original questions in response packets\n(defined in RFC6762 sec. 6).\nDefault configuration is 0, i.e. non-strict mode, since some implementations,\nsuch as lwIP mdns resolver (used by standard POSIX API like getaddrinfo, gethostbyname)\ncould not correctly resolve advertised names.",
+                        "id": "MDNS_STRICT_MODE",
+                        "name": "MDNS_STRICT_MODE",
+                        "range": null,
+                        "title": "mDNS strict mode",
+                        "type": "bool"
+                    },
+                    {
+                        "children": [],
+                        "depends_on": null,
                         "help": "Configures period of mDNS timer, which periodically transmits packets\nand schedules mDNS searches.",
                         "id": "MDNS_TIMER_PERIOD_MS",
                         "name": "MDNS_TIMER_PERIOD_MS",
@@ -15167,6 +15374,16 @@
                         "type": "bool"
                     },
                     {
+                        "children": [],
+                        "depends_on": null,
+                        "help": "SPI Flash driver uses the flash size configured in bootloader header by default.\nEnable this option to override flash size with latest ESPTOOLPY_FLASHSIZE value from\nthe app header if the size in the bootloader header is incorrect.",
+                        "id": "SPI_FLASH_SIZE_OVERRIDE",
+                        "name": "SPI_FLASH_SIZE_OVERRIDE",
+                        "range": null,
+                        "title": "Override flash size in bootloader header by ESPTOOLPY_FLASHSIZE",
+                        "type": "bool"
+                    },
+                    {
                         "children": [
                             {
                                 "children": [],
@@ -15203,6 +15420,16 @@
                         "id": "component-config-spi-flash-driver-auto-detect-flash-chips",
                         "title": "Auto-detect flash chips",
                         "type": "menu"
+                    },
+                    {
+                        "children": [],
+                        "depends_on": null,
+                        "help": "This option enables flash read/write operations to encrypted partition/s. This option\nis kept enabled irrespective of state of flash encryption feature. However, in case\napplication is not using flash encryption feature and is in need of some additional\nmemory from IRAM region (~1KB) then this config can be disabled.",
+                        "id": "SPI_FLASH_ENABLE_ENCRYPTED_READ_WRITE",
+                        "name": "SPI_FLASH_ENABLE_ENCRYPTED_READ_WRITE",
+                        "range": null,
+                        "title": "Enable encrypted partition read/write operations",
+                        "type": "bool"
                     }
                 ],
                 "depends_on": null,

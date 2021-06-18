@@ -1,8 +1,8 @@
-# Install script for directory: E:/personal/qixiaochen/esp32/Esp32Display3/main
+# Install script for directory: D:/personal/qixiaochen/AtomlerGunCode/main
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "C:/Program Files (x86)/udp-multicast")
+  set(CMAKE_INSTALL_PREFIX "C:/Program Files (x86)/AtomlerGun")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 

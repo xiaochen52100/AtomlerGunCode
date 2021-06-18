@@ -1,4 +1,4 @@
-/* * Data converted from E:/personal/qixiaochen/esp32/Esp32Display3/build/esp-idf/mbedtls/x509_crt_bundle
+/* * Data converted from D:/personal/qixiaochen/AtomlerGunCode/build/esp-idf/mbedtls/x509_crt_bundle
  */
 .data
 .section .rodata.embedded
