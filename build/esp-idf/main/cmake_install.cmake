@@ -1,4 +1,4 @@
-# Install script for directory: D:/personal/qixiaochen/AtomlerGunCode/main
+# Install script for directory: E:/personal/qixiaochen/AtomlerGunCode/main
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

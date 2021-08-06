@@ -25,7 +25,9 @@
 #include "driver/adc.h"
 #include "esp_adc_cal.h"
 #include "freertos/semphr.h"
-
+#include "nvs_app.h"
+#include "WifiScan.h"
+#include "station_app.h"
 
 #define UDP_PORT CONFIG_EXAMPLE_PORT
 
@@ -45,11 +47,16 @@ static const char *V4TAG = "mcast-ipv4";
 #ifdef CONFIG_EXAMPLE_IPV6
 static const char *V6TAG = "mcast-ipv6";
 #endif
+Parameter parameter = {
+    .ssid = "K2P_2_4G",
+    .password = "378540108"};
 int sock;
+struct in_addr iaddr = {0};
 static void mcast_send_data(char *data);
 int btn_flag = 0;
 int btn_flag2 = 0;
 int btn_state = 0;
+volatile int wifi_connected=0;
 SemaphoreHandle_t xSemaphore = NULL;
 double oldProgess = 999;
 int oldLastTime = 999;
@@ -168,6 +175,13 @@ static void rx_task(void *arg)
     {
         memset(data, 0, RX_BUF_SIZE + 1);
         const int rxBytes = uart_read_bytes(UART_NUM_1, data, RX_BUF_SIZE, 50 / portTICK_RATE_MS);
+        if (rxBytes == 2)
+        {
+            if (data[0] == 0xb1 && data[1] == 0xb2)
+            {
+                clean_config_param();
+            }
+        }
 
         if (rxBytes == 4)
         {
@@ -240,20 +254,20 @@ static void rx_task(void *arg)
 static int socket_add_ipv4_multicast_group(int sock, bool assign_source_if)
 {
     struct ip_mreq imreq = {0};
-    struct in_addr iaddr = {0};
+    //struct in_addr iaddr = {0};
     int err = 0;
     // Configure source interface
 #if LISTEN_ALL_IF
     imreq.imr_interface.s_addr = IPADDR_ANY;
 #else
-    esp_netif_ip_info_t ip_info = {0};
-    err = esp_netif_get_ip_info(get_example_netif(), &ip_info);
-    if (err != ESP_OK)
-    {
-        ESP_LOGE(V4TAG, "Failed to get IP address info. Error 0x%x", err);
-        goto err;
-    }
-    inet_addr_from_ip4addr(&iaddr, &ip_info.ip);
+    // esp_netif_ip_info_t ip_info = {0};
+    // err = esp_netif_get_ip_info(get_example_netif(), &ip_info);
+    // if (err != ESP_OK)
+    // {
+    //     ESP_LOGE(V4TAG, "Failed to get IP address info. Error 0x%x", err);
+    //     goto err;
+    // }
+    // inet_addr_from_ip4addr(&iaddr, &ip_info.ip);
 #endif // LISTEN_ALL_IF
     // Configure multicast address to listen to
     err = inet_aton(MULTICAST_IPV4_ADDR, &imreq.imr_multiaddr.s_addr);
@@ -766,7 +780,14 @@ static void mcast_example_task(void *pvParameters)
 }
 static void adc_task(void *arg)
 {
-
+    uint8_t batteryOld = 450;
+    long chargeTime = 0;
+    uint8_t electricity = 0;
+    uint8_t chargeState = 0;
+    uint8_t batteryCount =0;
+    gpio_pad_select_gpio(32);
+    gpio_set_direction(32, GPIO_MODE_INPUT);
+    printf("input charge is %d\n", gpio_get_level(32));
     //初始化ADC
     check_efuse();
     adc1_config_width(width);
@@ -794,20 +815,59 @@ static void adc_task(void *arg)
             }
             wifi_state_old = wifi_state;
         }
+        if (gpio_get_level(32) == 0)
+        {
+            //更新电池电量
+            uint32_t adc_reading = 0;
+            chargeTime=0;
+            //Multisampling
+            for (int i = 0; i < 64; i++)
+            {
+
+                adc_reading += adc1_get_raw((adc1_channel_t)channel);
+            }
+            adc_reading /= 64;
+            //Convert adc_reading to voltage in mV
+            uint32_t voltage = esp_adc_cal_raw_to_voltage(adc_reading, adc_chars); //  350-450
+            electricity = voltage - 350;
+            batteryOld = electricity;
+            if (chargeState == 1)
+            {
+                char electricity_string[32];
+                sprintf(electricity_string, "p2.pic=%d", 7);
+                sendData(TAG, electricity_string);
+                sendData(TAG, END);
+            }
+            chargeState = 0;
+            batteryCount=0;
+        }
+        if (gpio_get_level(32) == 1)
+        {
+            if (chargeState == 0)
+            {
+                char electricity_string[32];
+                sprintf(electricity_string, "p2.pic=%d", 6);
+                sendData(TAG, electricity_string);
+                sendData(TAG, END);
+            }
+            chargeState = 1;
+            chargeTime++;
+            electricity = batteryOld + (chargeTime / 60 / 6)*1.15;
+        }
 
         //更新电池电量
-        uint32_t adc_reading = 0;
-        int8_t electricity = 0;
-        //Multisampling
-        for (int i = 0; i < 64; i++)
-        {
+        // uint32_t adc_reading = 0;
+        // int8_t electricity = 0;
+        // //Multisampling
+        // for (int i = 0; i < 64; i++)
+        // {
 
-            adc_reading += adc1_get_raw((adc1_channel_t)channel);
-        }
-        adc_reading /= 64;
-        //Convert adc_reading to voltage in mV
-        uint32_t voltage = esp_adc_cal_raw_to_voltage(adc_reading, adc_chars); //  350-450
-        electricity = voltage - 350;
+        //     adc_reading += adc1_get_raw((adc1_channel_t)channel);
+        // }
+        // adc_reading /= 64;
+        // //Convert adc_reading to voltage in mV
+        // uint32_t voltage = esp_adc_cal_raw_to_voltage(adc_reading, adc_chars); //  350-450
+        // electricity = voltage - 350;
         if (electricity > 100)
         {
             electricity = 100;
@@ -816,10 +876,39 @@ static void adc_task(void *arg)
         {
             electricity = 0;
         }
-        char electricity_string[32];
-        sprintf(electricity_string, "j1.val=%d", electricity);
-        sendData(TAG, electricity_string);
-        sendData(TAG, END);
+        //printf("electricity：%d  batteryCount:%d \n", electricity,batteryCount);
+        if (electricity > 0 && electricity < 25)
+        {
+            char electricity_string[32];
+            batteryCount=1;
+            sprintf(electricity_string, "p1.pic=%d", 2);
+            sendData(TAG, electricity_string);
+            sendData(TAG, END);
+        }
+        else if (electricity > 25 && electricity < 50)
+        {
+            char electricity_string[32];
+            batteryCount=2;
+            sprintf(electricity_string, "p1.pic=%d", 3);
+            sendData(TAG, electricity_string);
+            sendData(TAG, END);
+        }
+        else if (electricity > 50 && electricity < 75)
+        {
+            char electricity_string[32];
+            batteryCount=3;
+            sprintf(electricity_string, "p1.pic=%d", 4);
+            sendData(TAG, electricity_string);
+            sendData(TAG, END);
+        }
+        else if (electricity > 75 && electricity <= 100)
+        {
+            char electricity_string[32];
+            batteryCount=4;
+            sprintf(electricity_string, "p1.pic=%d", 5);
+            sendData(TAG, electricity_string);
+            sendData(TAG, END);
+        }
 
         //printf("Raw: %d\tVoltage: %dmV  electricity：%d\n", adc_reading, voltage, electricity);
         vTaskDelay(pdMS_TO_TICKS(1000));
@@ -827,6 +916,7 @@ static void adc_task(void *arg)
 }
 void app_main(void)
 {
+    int val=0;
     xSemaphore = xSemaphoreCreateMutex(); //初始化互斥锁
     uart_init();
     wifi_state = 0;
@@ -835,20 +925,32 @@ void app_main(void)
     sprintf(wifi_string, "p0.pic=%d", 0);
     sendData(TAG, wifi_string);
     sendData(TAG, END);
-    
+
     xTaskCreate(adc_task, "adc_task_", 1024 * 2, NULL, configMAX_PRIORITIES, NULL);
 
-    ESP_ERROR_CHECK(nvs_flash_init());
-    ESP_ERROR_CHECK(esp_netif_init());
-    ESP_ERROR_CHECK(esp_event_loop_create_default());
-
-    /* This helper function configures Wi-Fi or Ethernet, as selected in menuconfig.
-     * Read "Establishing Wi-Fi or Ethernet Connection" section in
-     * examples/protocols/README.md for more information about this function.
-     */
-    ESP_ERROR_CHECK(example_connect());
-
-    xTaskCreate(&mcast_example_task, "mcast_task", 4096, NULL, 5, NULL);
+    esp_err_t err = nvs_flash_init();
+    if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND)
+    {
+        // NVS partition was truncated and needs to be erased
+        // Retry nvs_flash_init
+        ESP_ERROR_CHECK(nvs_flash_erase());
+        err = nvs_flash_init();
+    }
+    ESP_ERROR_CHECK(err);
+    if (get_config_param() == -1) //如果nvs里没有wifi信息
+    {
+        Wifi_Init(0);
+    }
+    else
+    {
+        Wifi_Init(1);
+    }
     xTaskCreate(rx_task, "uart_rx_task", 1024 * 2, NULL, configMAX_PRIORITIES, NULL);
+    while (wifi_connected!=1)
+    {
+        vTaskDelay(10 / portTICK_PERIOD_MS);
+    }
+    vTaskDelay(2000 / portTICK_PERIOD_MS);
+    xTaskCreate(&mcast_example_task, "mcast_task", 4096, NULL, 5, NULL);
     
 }
